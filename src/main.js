@@ -1,8 +1,9 @@
 import { createApp } from 'vue';
 import VueGapi from 'vue-gapi';
 import App from './App.vue';
+import router from './router'
 
-const app = createApp(App);
+const app = createApp(App).use(router);
 app.use(VueGapi, {
   apiKey: process.env.VUE_APP_API_KEY,
   clientId: process.env.VUE_APP_CLIENT_ID,

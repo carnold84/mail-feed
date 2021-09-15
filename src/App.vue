@@ -1,43 +1,30 @@
 <template>
-  <p v-if="isSignedIn === null">Loading...</p>
-  <sign-in-page v-else-if="isSignedIn === false" @sign-in="onSignIn" />
-  <home-page v-else-if="isSignedIn === true" @sign-out="onSignOut" />
+  <div id="nav">
+    <router-link to="/">Home</router-link> |
+    <router-link to="/about">About</router-link>
+  </div>
+  <router-view/>
 </template>
 
-<script>
-  import SignInPage from '@/components/SignInPage.vue';
-  import HomePage from '@/components/HomePage.vue';
+<style lang="scss">
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
 
-  export default {
-    name: 'App',
-    components: {
-      HomePage,
-      SignInPage,
-    },
-    data() {
-      return {
-        isSignedIn: null,
-        gapi: null,
-      };
-    },
-    async mounted() {
-      this.gapi = await this.$gapi.getGapiClient();
-      this.gapi.auth2
-        .getAuthInstance()
-        .isSignedIn.listen(this.updateSigninStatus);
+#nav {
+  padding: 30px;
 
-      this.isSignedIn = this.gapi.auth2.getAuthInstance().isSignedIn.get();
-    },
-    methods: {
-      onSignOut() {
-        this.gapi.auth2.getAuthInstance().signOut();
-      },
-      onSignIn() {
-        this.gapi.auth2.getAuthInstance().signIn();
-      },
-      updateSigninStatus(isSignedIn) {
-        this.isSignedIn = isSignedIn;
-      },
-    },
-  };
-</script>
+  a {
+    font-weight: bold;
+    color: #2c3e50;
+
+    &.router-link-exact-active {
+      color: #42b983;
+    }
+  }
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="v_home">
     <div>
-      <header class="home-header">
+      <header class="header">
         Mail Feed
         <button @click="$emit('sign-out')">Sign Out</button>
       </header>
@@ -18,16 +18,12 @@
         </div>
       </main>
     </div>
-    <feed-page v-if="selectedLabel" :label="selectedLabel" />
   </div>
 </template>
 
 <script>
-  import FeedPage from '@/components/FeedPage.vue';
-
   export default {
-    components: { FeedPage },
-    name: 'HomePage',
+    name: 'Home',
     data() {
       return {
         isLoading: null,
@@ -53,7 +49,7 @@
 </script>
 
 <style scoped>
-  .v_home_page {
+  .v_home {
     background-color: blanchedalmond;
     height: 100%;
     left: 0;

@@ -1,5 +1,5 @@
 <template>
-  <div class="v_message_page">
+  <div class="v_message">
     <header class="header">
       Back
     </header>
@@ -9,7 +9,7 @@
 
 <script>
   export default {
-    name: 'MessagePage',
+    name: 'Message',
     props: {
       message: {
         required: true,
@@ -25,7 +25,7 @@
 </script>
 
 <style lang="scss" scoped>
-  .v_message_page {
+  .v_message {
     background-color: darkgray;
     display: flex;
     flex-direction: column;
