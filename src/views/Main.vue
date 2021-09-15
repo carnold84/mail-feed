@@ -1,13 +1,10 @@
 <template>
   <div class="v_main">
-    <div v-if="isLoading">Loading...</div>
-    <div v-else>
-      <home-view :is-disabled="location === 'label'" />
-      <transition-group name="over">
-        <label-view v-if="location === 'label'" />
-        <message-view v-if="location === 'message'" />
-      </transition-group>
-    </div>
+    <home-view :is-disabled="location === 'label'" />
+    <transition-group name="over">
+      <label-view v-if="location === 'label'" />
+      <message-view v-if="location === 'message'" />
+    </transition-group>
   </div>
 </template>
 
@@ -19,23 +16,6 @@
   export default {
     components: { HomeView, LabelView, MessageView },
     name: 'Main',
-    data() {
-      return {
-        isLoading: null,
-      };
-    },
-    async mounted() {
-      this.isLoading = true;
-
-      const gapi = await this.$gapi.getGapiClient();
-      const response = await gapi.client.gmail.users.labels.list({
-        userId: 'me',
-      });
-
-      this.$store.dispatch('setLabels', response);
-
-      this.isLoading = false;
-    },
     computed: {
       location() {
         const { name } = this.$route;

@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Main from '@/views/Main.vue';
+import HomeView from '@/views/Home.vue';
+import LabelView from '@/views/Label.vue';
+import MessageView from '@/views/Message.vue';
 import SignInView from '@/views/SignIn.vue';
 
 const routes = [
@@ -10,18 +12,18 @@ const routes = [
   },
   {
     path: '/',
-    name: 'Main',
-    component: Main,
+    name: 'Home',
+    component: HomeView,
   },
   {
-    path: '/label/:id',
+    path: '/label/:labelId',
     name: 'Label',
-    component: Main,
+    component: LabelView,
   },
   {
-    path: '/message/:id',
+    path: '/label/:labelId/message/:messageId',
     name: 'Message',
-    component: Main,
+    component: MessageView,
   },
 ];
 

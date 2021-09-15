@@ -1,26 +1,61 @@
 <template>
   <div class="v_home">
-    <div>
-      <header class="header">
-        Mail Feed
-        <button @click="$emit('sign-out')">Sign Out</button>
-      </header>
-      <main>
-        <ul>
-          <li v-for="label in labels" :key="label.id">
-            <router-link :to="{ name: 'Label', params: { id: label.id } }">
-              {{ label.name.replace('newsly_', '') }}
-            </router-link>
-          </li>
-        </ul>
-      </main>
-    </div>
+    <c-header-bar class="header">
+      <template v-slot:content-left>
+        Newsly
+      </template>
+      <template v-slot:content-right>
+        <c-button @click="$emit('sign-out')">
+          Sign Out
+        </c-button>
+      </template>
+    </c-header-bar>
+    <main class="content">
+      <div v-if="isLoading">Loading...</div>
+      <c-table v-else>
+        <template v-slot:body>
+          <c-table-row v-for="label in labels" :key="label.id">
+            <c-table-cell>
+              <router-link
+                :to="{ name: 'Label', params: { labelId: label.id } }"
+              >
+                {{ label.name.replace('newsly_', '') }}
+              </router-link>
+            </c-table-cell>
+          </c-table-row>
+        </template>
+      </c-table>
+    </main>
   </div>
 </template>
 
 <script>
+  import CButton from '@/components/CButton';
+  import CHeaderBar from '@/components/CHeaderBar';
+  import CTable from '@/components/CTable.vue';
+  import CTableCell from '@/components/CTableCell.vue';
+  import CTableRow from '@/components/CTableRow.vue';
+
   export default {
     name: 'Home',
+    components: { CButton, CHeaderBar, CTable, CTableCell, CTableRow },
+    data() {
+      return {
+        isLoading: null,
+      };
+    },
+    async mounted() {
+      this.isLoading = true;
+
+      const gapi = await this.$gapi.getGapiClient();
+      const response = await gapi.client.gmail.users.labels.list({
+        userId: 'me',
+      });
+
+      this.$store.dispatch('setLabels', response);
+
+      this.isLoading = false;
+    },
     computed: {
       labels() {
         return this.$store.getters.getAllLabels;
@@ -29,13 +64,22 @@
   };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
   .v_home {
-    background-color: blanchedalmond;
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
     width: 100%;
+
+    .header {
+      z-index: 1;
+    }
+
+    .content {
+      background-color: #ffffff;
+      flex-grow: 1;
+      padding: 30px;
+      position: relative;
+    }
   }
 </style>

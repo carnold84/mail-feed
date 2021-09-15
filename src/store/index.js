@@ -8,10 +8,6 @@ export default createStore({
       allIds: [],
       byId: {},
     },
-    messages: {
-      allIds: [],
-      byId: {},
-    },
     isSignedIn: undefined,
   },
   getters: {
@@ -26,13 +22,59 @@ export default createStore({
         return state.labels.byId[id];
       });
     },
-    getMessageById: (state) => (id) => {
-      return state.messages.byId[id];
+    getMessageById: (state) => ({ labelId, messageId }) => {
+      const label = state.labels.byId[labelId];
+      return label?.messages?.byId[messageId];
     },
-    getMessagesByLabel: (state) => () => {
-      return state.messages.allIds.map((id) => {
-        return state.messages.byId[id];
+    getMessagesByLabel: (state) => (id) => {
+      const label = state.labels.byId[id];
+
+      if (!label?.messages) {
+        return undefined;
+      }
+
+      return label?.messages.allIds.map((id) => {
+        return label.messages.byId[id];
       });
+    },
+  },
+  actions: {
+    setSignedIn({ commit }, isSignedIn) {
+      commit('setSignedIn', isSignedIn);
+    },
+    async setLabel({ commit }, label) {
+      commit('setLabel', label.result);
+    },
+    async setLabels({ commit }, data) {
+      const labels = data.result.labels.filter(({ name }) => {
+        return name.includes('newsly_');
+      });
+
+      commit('setLabels', labels);
+    },
+    async setLabelMessages({ commit }, { labelId, messages }) {
+      const nextMessages = messages.map(({ result }) => {
+        return {
+          ...result,
+          content: extractContent(result),
+          date: extractField(result, 'Date'),
+          from: extractField(result, 'From').replace(/<.*?>\s?/g, ''),
+          subject: extractField(result, 'Subject'),
+        };
+      });
+
+      commit('setLabelMessages', { labelId, messages: nextMessages });
+    },
+    async setLabelMessage({ commit }, { labelId, message }) {
+      const nextMessage = {
+        ...message.result,
+        content: extractContent(message.result),
+        date: extractField(message.result, 'Date'),
+        from: extractField(message.result, 'From').replace(/<.*?>\s?/g, ''),
+        subject: extractField(message.result, 'Subject'),
+      };
+
+      commit('setLabelMessage', { labelId, message: nextMessage });
     },
   },
   mutations: {
@@ -43,57 +85,38 @@ export default createStore({
       state.labels.allIds.push(label.id);
       state.labels.byId[label.id] = label;
     },
-    setMessage(state, message) {
-      if (!state.messages.allIds.includes(message.id)) {
-        state.messages.allIds.push(message.id);
-      }
-      state.messages.byId[message.id] = message;
-    },
-    setMessages(state, messages) {
-      state.messages.allIds = [];
-      state.messages.byId = {};
-
-      messages.forEach((message) => {
-        state.messages.allIds.push(message.id);
-        state.messages.byId[message.id] = message;
-      });
-    },
-  },
-  actions: {
-    setSignedIn({ commit }, isSignedIn) {
-      commit('setSignedIn', isSignedIn);
-    },
-    async setLabels({ commit }, data) {
-      const labels = data.result.labels.filter(({ name }) => {
-        return name.includes('newsly_');
-      });
+    setLabels(state, labels) {
+      state.labels.allIds = [];
+      state.labels.byId = {};
 
       labels.forEach((label) => {
-        commit('setLabel', label);
+        state.labels.allIds.push(label.id);
+        state.labels.byId[label.id] = label;
       });
     },
-    async setMessages({ commit }, messages) {
-      const nextMessages = messages.map(({ result }) => {
-        return {
-          ...result,
-          date: extractField(result, 'Date'),
-          from: extractField(result, 'From'),
-          subject: extractField(result, 'Subject'),
+    setLabelMessage(state, { labelId, message }) {
+      const label = state.labels.byId[labelId];
+
+      if (!label?.messages) {
+        label.messages = {
+          allIds: [],
+          byId: {},
         };
-      });
+      }
 
-      commit('setMessages', nextMessages);
+      label.messages.byId[message.id] = message;
     },
-    async setMessage({ commit }, message) {
-      const nextMessage = {
-        ...message.result,
-        content: extractContent(message.result),
-        date: extractField(message.result, 'Date'),
-        from: extractField(message.result, 'From'),
-        subject: extractField(message.result, 'Subject'),
+    setLabelMessages(state, { labelId, messages }) {
+      const nextMessages = {
+        allIds: [],
+        byId: {},
       };
-
-      commit('setMessage', nextMessage);
+      messages.forEach((message) => {
+        nextMessages.allIds.push(message.id);
+        nextMessages.byId[message.id] = message;
+      });
+      const label = state.labels.byId[labelId];
+      label.messages = nextMessages;
     },
   },
   modules: {},
