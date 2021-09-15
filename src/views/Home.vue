@@ -6,16 +6,13 @@
         <button @click="$emit('sign-out')">Sign Out</button>
       </header>
       <main>
-        <p v-if="labels === undefined">Loading...</p>
-        <div v-else>
-          <button
-            v-for="label in labels"
-            :key="label.id"
-            @click="onLabelSelect(label)"
-          >
-            {{ label.name.replace('newsly_', '') }}
-          </button>
-        </div>
+        <ul>
+          <li v-for="label in labels" :key="label.id">
+            <router-link :to="{ name: 'Label', params: { id: label.id } }">
+              {{ label.name.replace('newsly_', '') }}
+            </router-link>
+          </li>
+        </ul>
       </main>
     </div>
   </div>
@@ -24,25 +21,9 @@
 <script>
   export default {
     name: 'Home',
-    data() {
-      return {
-        isLoading: null,
-        labels: undefined,
-        selectedLabel: null,
-      };
-    },
-    async mounted() {
-      const gapi = await this.$gapi.getGapiClient();
-      const response = await gapi.client.gmail.users.labels.list({
-        userId: 'me',
-      });
-      this.labels = response.result.labels.filter(({ name }) => {
-        return name.includes('newsly_');
-      });
-    },
-    methods: {
-      onLabelSelect(label) {
-        this.selectedLabel = label;
+    computed: {
+      labels() {
+        return this.$store.getters.getAllLabels;
       },
     },
   };

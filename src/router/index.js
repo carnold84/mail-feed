@@ -1,19 +1,25 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Main from '@/views/Main.vue';
+import SignInView from '@/views/SignIn.vue';
 
 const routes = [
+  {
+    path: '/sign-in',
+    name: 'SignIn',
+    component: SignInView,
+  },
   {
     path: '/',
     name: 'Main',
     component: Main,
   },
   {
-    path: '/',
-    name: 'Feed',
+    path: '/label/:id',
+    name: 'Label',
     component: Main,
   },
   {
-    path: '/',
+    path: '/message/:id',
     name: 'Message',
     component: Main,
   },
