@@ -1,19 +1,10 @@
 <template>
-  <div v-if="isSignedIn === undefined">Loading...</div>
-  <router-view v-else />
+  <router-view />
 </template>
 
 <script>
   export default {
     name: 'Home',
-    computed: {
-      isSignedIn() {
-        return this.$store.getters.isSignedIn;
-      },
-    },
-    mounted() {
-      this.$store.dispatch('init');
-    },
   };
 </script>
 

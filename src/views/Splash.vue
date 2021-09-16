@@ -1,6 +1,6 @@
 <template>
   <div class="v_splash">
-    Initialising...
+    Newsly
   </div>
 </template>
 

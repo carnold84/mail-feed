@@ -9,7 +9,7 @@
       </template>
     </c-header-bar>
     <main class="content">
-      <p v-if="isLoading">Loading...</p>
+      <p v-if="isLoading" style="height: 200px;">Loading...</p>
       <c-table v-else>
         {{ messages }}
         <template v-slot:body>
@@ -43,7 +43,7 @@
     components: { CButton, CHeaderBar, CTable, CTableCell, CTableRow },
     data() {
       return {
-        isLoading: null,
+        isLoading: false,
       };
     },
     computed: {
@@ -58,17 +58,23 @@
       },
     },
     async mounted() {
-      this.isLoading = true;
+      const requests = [];
 
       if (!this.label) {
-        await this.$store.dispatch('loadLabel', this.labelId);
+        requests.push(this.$store.dispatch('loadLabel', this.labelId));
       }
 
       if (!this.label?.isLoaded) {
-        this.$store.dispatch('loadLabelMessages', this.labelId);
+        requests.push(this.$store.dispatch('loadLabelMessages', this.labelId));
       }
 
-      this.isLoading = false;
+      if (requests.length > 0) {
+        this.isLoading = true;
+
+        await Promise.all(requests);
+
+        this.isLoading = false;
+      }
     },
   };
 </script>

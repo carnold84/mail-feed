@@ -87,13 +87,17 @@ export default createStore({
       state.initialRoute = route;
     },
     setLabel(state, label) {
-      state.labels.allIds.push(label.id);
+      if (state.labels.allIds.indexOf(label.id) === -1) {
+        state.labels.allIds.push(label.id);
+      }
       state.labels.byId[label.id] = label;
     },
     setLabels(state, labels) {
       state.labels.isLoaded = true;
       labels.forEach((label) => {
-        state.labels.allIds.push(label.id);
+        if (state.labels.allIds.indexOf(label.id) === -1) {
+          state.labels.allIds.push(label.id);
+        }
         state.labels.byId[label.id] = label;
       });
     },
@@ -115,7 +119,9 @@ export default createStore({
         byId: {},
       };
       messages.forEach((message) => {
-        nextMessages.allIds.push(message.id);
+        if (nextMessages.allIds.indexOf(message.id) === -1) {
+          nextMessages.allIds.push(message.id);
+        }
         nextMessages.byId[message.id] = message;
       });
       const label = state.labels.byId[labelId];

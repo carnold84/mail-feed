@@ -11,7 +11,7 @@
       </template>
     </c-header-bar>
     <main class="content">
-      <div v-if="isLoading">Loading...</div>
+      <div v-if="isLoading" style="height: 200px;">Loading...</div>
       <c-table v-else>
         <template v-slot:body>
           <c-table-row v-for="label in labels" :key="label.id">

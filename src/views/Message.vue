@@ -50,20 +50,28 @@
       },
     },
     async mounted() {
-      this.isLoading = true;
+      const requests = [];
 
       if (!this.label) {
-        await this.$store.dispatch('loadLabel', this.labelId);
+        requests.push(this.$store.dispatch('loadLabel', this.labelId));
       }
 
       if (!this.label?.isLoaded) {
-        this.$store.dispatch('loadLabelMessage', {
-          labelId: this.labelId,
-          messageId: this.messageId,
-        });
+        requests.push(
+          this.$store.dispatch('loadLabelMessage', {
+            labelId: this.labelId,
+            messageId: this.messageId,
+          })
+        );
       }
 
-      this.isLoading = false;
+      if (requests.length > 0) {
+        this.isLoading = true;
+
+        await Promise.all(requests);
+
+        this.isLoading = false;
+      }
     },
   };
 </script>
