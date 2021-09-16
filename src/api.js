@@ -61,11 +61,11 @@ export const loadLabelMessage = async (messageId) => {
   };
 };
 
-export const signin = () => {
+export const signIn = () => {
   return gapi.auth2.getAuthInstance().signIn();
 };
 
-export const signout = () => {
+export const signOut = () => {
   const ai = gapi.auth2.getAuthInstance();
   ai.signOut();
 };
@@ -75,27 +75,30 @@ export const getSignInStatus = () => {
 };
 
 export const initClient = (onSignIn) => {
-  return gapi.load('client:auth2', () => {
-    gapi.client
-      .init({
-        apiKey: process.env.VUE_APP_API_KEY,
-        clientId: process.env.VUE_APP_CLIENT_ID,
-        discoveryDocs: [
-          'https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest',
-        ],
-        scope: 'https://www.googleapis.com/auth/gmail.readonly',
-      })
-      .then(
-        () => {
-          // Listen for sign-in state changes.
-          gapi.auth2.getAuthInstance().isSignedIn.listen(onSignIn);
+  return new Promise((resolve, reject) => {
+    gapi.load('client:auth2', () => {
+      gapi.client
+        .init({
+          apiKey: process.env.VUE_APP_API_KEY,
+          clientId: process.env.VUE_APP_CLIENT_ID,
+          discoveryDocs: [
+            'https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest',
+          ],
+          scope: 'https://www.googleapis.com/auth/gmail.readonly',
+        })
+        .then(
+          () => {
+            gapi.auth2.getAuthInstance().isSignedIn.listen(onSignIn);
 
-          // Handle the initial sign-in state.
-          onSignIn(gapi.auth2.getAuthInstance().isSignedIn.get());
-        },
-        (error) => {
-          console.error('Init failed', error);
-        }
-      );
+            onSignIn(gapi.auth2.getAuthInstance().isSignedIn.get());
+
+            resolve();
+          },
+          (error) => {
+            reject(error);
+            console.error('Init failed', error);
+          }
+        );
+    });
   });
 };
