@@ -15,11 +15,15 @@ export default createStore({
       byId: {},
       isLoaded: false,
     },
+    initialRoute: undefined,
     isSignedIn: undefined,
   },
   getters: {
     areLabelsLoaded(state) {
       return state.labels.isLoaded;
+    },
+    initialRoute(state) {
+      return state.initialRoute;
     },
     isSignedIn(state) {
       return state.isSignedIn;
@@ -50,7 +54,7 @@ export default createStore({
   },
   actions: {
     async init({ commit }) {
-      initClient((isSignedIn) => {
+      await initClient((isSignedIn) => {
         commit('setSignedIn', isSignedIn);
       });
     },
@@ -74,10 +78,13 @@ export default createStore({
 
       commit('setLabelMessage', { labelId, message });
     },
+    setInitialRoute({ commit }, route) {
+      commit('setInitialRoute', route);
+    },
   },
   mutations: {
-    setSignedIn(state, isSignedIn) {
-      state.isSignedIn = isSignedIn;
+    setInitialRoute(state, route) {
+      state.initialRoute = route;
     },
     setLabel(state, label) {
       state.labels.allIds.push(label.id);
@@ -114,6 +121,9 @@ export default createStore({
       const label = state.labels.byId[labelId];
       label.isLoaded = true;
       label.messages = nextMessages;
+    },
+    setSignedIn(state, isSignedIn) {
+      state.isSignedIn = isSignedIn;
     },
   },
   modules: {},
