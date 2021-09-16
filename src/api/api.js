@@ -61,13 +61,13 @@ export const loadLabelMessage = async (messageId) => {
   };
 };
 
-export const signIn = () => {
-  return gapi.auth2.getAuthInstance().signIn();
+export const signIn = async () => {
+  return await gapi.auth2.getAuthInstance().signIn();
 };
 
-export const signOut = () => {
+export const signOut = async () => {
   const ai = gapi.auth2.getAuthInstance();
-  ai.signOut();
+  await ai.signOut();
 };
 
 export const getSignInStatus = () => {

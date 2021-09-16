@@ -75,6 +75,17 @@ export default createStore({
     setInitialRoute({ commit }, route) {
       commit('setInitialRoute', route);
     },
+    async signIn({ commit }) {
+      await api.signIn();
+
+      commit('setSignedIn', true);
+    },
+    async signOut({ commit }) {
+      console.log('signOut');
+      await api.signOut();
+
+      commit('setSignedIn', false);
+    },
   },
   mutations: {
     setInitialRoute(state, route) {
