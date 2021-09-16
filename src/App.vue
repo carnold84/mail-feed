@@ -11,21 +11,8 @@
         return this.$store.getters.isSignedIn;
       },
     },
-    async mounted() {
-      console.log(this.$gapi);
-      this.gapi = await this.$gapi.getGapiClient();
-      this.gapi.auth2
-        .getAuthInstance()
-        .isSignedIn.listen(this.updateSigninStatus);
-
-      const isSignedIn = this.gapi.auth2.getAuthInstance().isSignedIn.get();
-
-      this.$store.dispatch('setSignedIn', isSignedIn);
-    },
-    methods: {
-      updateSigninStatus(isSignedIn) {
-        this.$store.dispatch('setSignedIn', isSignedIn);
-      },
+    mounted() {
+      this.$store.dispatch('init');
     },
   };
 </script>

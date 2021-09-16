@@ -45,18 +45,18 @@
       };
     },
     async mounted() {
-      this.isLoading = true;
+      if (this.areLabelsLoaded === false) {
+        this.isLoading = true;
 
-      const gapi = await this.$gapi.getGapiClient();
-      const response = await gapi.client.gmail.users.labels.list({
-        userId: 'me',
-      });
+        this.$store.dispatch('loadLabels');
 
-      this.$store.dispatch('setLabels', response);
-
-      this.isLoading = false;
+        this.isLoading = false;
+      }
     },
     computed: {
+      areLabelsLoaded() {
+        return this.$store.getters.areLabelsLoaded;
+      },
       labels() {
         return this.$store.getters.getAllLabels;
       },

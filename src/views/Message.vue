@@ -50,31 +50,16 @@
       },
     },
     async mounted() {
-      console.log(this.label, this.message);
       this.isLoading = true;
 
-      const gapi = await this.$gapi.getGapiClient();
-
       if (!this.label) {
-        console.log('no label');
-        const label = await gapi.client.gmail.users.labels.get({
-          id: this.labelId,
-          userId: 'me',
-        });
-        this.$store.dispatch('setLabel', label);
+        await this.$store.dispatch('loadLabel', this.labelId);
       }
 
-      if (!this.message) {
-        const message = await gapi.client.gmail.users.messages.get({
-          id: this.messageId,
-          userId: 'me',
-        });
-
-        console.log(message);
-
-        this.$store.dispatch('setLabelMessage', {
+      if (!this.label?.isLoaded) {
+        this.$store.dispatch('loadLabelMessage', {
           labelId: this.labelId,
-          message,
+          messageId: this.messageId,
         });
       }
 
