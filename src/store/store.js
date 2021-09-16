@@ -1,11 +1,5 @@
 import { createStore } from 'vuex';
-import {
-  initClient,
-  loadLabel,
-  loadLabels,
-  loadLabelMessage,
-  loadLabelMessages,
-} from '@/api';
+import api from '@/api';
 
 export default createStore({
   strict: true,
@@ -54,27 +48,27 @@ export default createStore({
   },
   actions: {
     async init({ commit }) {
-      await initClient((isSignedIn) => {
+      await api.initClient((isSignedIn) => {
         commit('setSignedIn', isSignedIn);
       });
     },
     async loadLabels({ commit }) {
-      const labels = await loadLabels();
+      const labels = await api.loadLabels();
 
       commit('setLabels', labels);
     },
     async loadLabel({ commit }, labelId) {
-      const label = await loadLabel(labelId);
+      const label = await api.loadLabel(labelId);
 
       commit('setLabel', label);
     },
     async loadLabelMessages({ commit }, labelId) {
-      const messages = await loadLabelMessages(labelId);
+      const messages = await api.loadLabelMessages(labelId);
 
       commit('setLabelMessages', { labelId, messages });
     },
     async loadLabelMessage({ commit }, { labelId, messageId }) {
-      const message = await loadLabelMessage(messageId);
+      const message = await api.loadLabelMessage(messageId);
 
       commit('setLabelMessage', { labelId, message });
     },
