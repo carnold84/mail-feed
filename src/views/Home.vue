@@ -35,13 +35,15 @@
       </template>
     </c-header-bar>
     <main class="content">
-      <div v-if="isLoading" style="height: 200px; width: 100%;">Loading...</div>
+      <c-typography v-if="isLoading" style="height: 200px;">
+        Loading...
+      </c-typography>
       <div v-else class="list">
         <c-card
           v-for="label in labels"
           component="router-link"
           :key="label.id"
-          :title="formatLabel(label.name)"
+          :title="label.name"
           :to="{ name: 'Label', params: { labelId: label.id } }"
         />
       </div>
@@ -65,14 +67,14 @@
     },
     data() {
       return {
-        isLoading: null,
+        isLoading: false,
       };
     },
     async mounted() {
       if (this.areLabelsLoaded === false) {
         this.isLoading = true;
 
-        this.$store.dispatch('loadLabels');
+        await this.$store.dispatch('loadLabels');
 
         this.isLoading = false;
       }
@@ -82,17 +84,10 @@
         return this.$store.getters.areLabelsLoaded;
       },
       labels() {
-        console.log(this.$store.getters.getAllLabels);
         return this.$store.getters.getAllLabels;
       },
     },
     methods: {
-      formatLabel(label) {
-        const capitalizeFirstLetter = ([first, ...rest]) => {
-          return `${first.toUpperCase()}${rest.join('')}`;
-        };
-        return capitalizeFirstLetter(label);
-      },
       async signOut() {
         await this.$store.dispatch('signOut');
 

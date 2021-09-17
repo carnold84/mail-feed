@@ -1,5 +1,9 @@
 <template>
-  <component class="c_card" :is="component" :to="to">
+  <component
+    :class="['c_card', { is_visited: isVisited }]"
+    :is="component"
+    :to="to"
+  >
     <c-typography class="title" component="h3" variant="p">
       {{ title }}
     </c-typography>
@@ -38,6 +42,12 @@
       to: {
         type: [Object, String],
       },
+      isVisited: {
+        default() {
+          return false;
+        },
+        type: Boolean,
+      },
     },
   };
 </script>
@@ -52,6 +62,10 @@
     padding: 10px 15px;
     text-decoration: none;
     width: 100%;
+
+    &.is_visited {
+      opacity: 0.7;
+    }
 
     .meta,
     .sub_title,
