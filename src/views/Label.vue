@@ -2,45 +2,55 @@
   <div class="v_label">
     <c-header-bar class="header">
       <template v-slot:content-left>
-        <c-button style="margin: 0 10px 0 0" @click="$router.back()">
-          Back
-        </c-button>
-        {{ label?.name }}
+        <c-icon-button class="back_btn" @click="$router.back()">
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7.83 11L11.41 7.41L10 6L4 12L10 18L11.41 16.59L7.83 13H20V11H7.83Z"
+            />
+          </svg>
+        </c-icon-button>
+        <c-typography style="margin: 0;">{{ label?.name }}</c-typography>
       </template>
     </c-header-bar>
     <main class="content">
       <p v-if="isLoading" style="height: 200px;">Loading...</p>
-      <c-table v-else>
-        {{ messages }}
-        <template v-slot:body>
-          <c-table-row v-for="message in messages" :key="message.id">
-            <c-table-cell>
-              <router-link :to="`/label/${labelId}/message/${message.id}`">
-                {{ message.from }}
-              </router-link>
-            </c-table-cell>
-            <c-table-cell>
-              <router-link :to="`/label/${labelId}/message/${message.id}`">
-                {{ message.subject }}
-              </router-link>
-            </c-table-cell>
-          </c-table-row>
-        </template>
-      </c-table>
+      <div v-else class="list">
+        <c-card
+          v-for="message in messages"
+          component="router-link"
+          :key="message.id"
+          :meta="formatDate(message.date)"
+          :subTitle="message.subject"
+          :title="message.from"
+          :to="{
+            name: 'Message',
+            params: { labelId: label.id, messageId: message.id },
+          }"
+        />
+      </div>
     </main>
   </div>
 </template>
 
 <script>
-  import CButton from '@/components/CButton';
+  import CCard from '../components/CCard.vue';
   import CHeaderBar from '@/components/CHeaderBar';
-  import CTable from '@/components/CTable.vue';
-  import CTableCell from '@/components/CTableCell.vue';
-  import CTableRow from '@/components/CTableRow.vue';
+  import CIconButton from '@/components/CIconButton';
+  import CTypography from '../components/CTypography.vue';
 
   export default {
     name: 'Label',
-    components: { CButton, CHeaderBar, CTable, CTableCell, CTableRow },
+    components: {
+      CCard,
+      CIconButton,
+      CHeaderBar,
+      CTypography,
+    },
     data() {
       return {
         isLoading: false,
@@ -76,6 +86,14 @@
         this.isLoading = false;
       }
     },
+    methods: {
+      formatDate(date) {
+        const dateTime = new Intl.DateTimeFormat('en-GB', {
+          dateStyle: 'full',
+        });
+        return dateTime.format(new Date(date));
+      },
+    },
   };
 </script>
 
@@ -88,6 +106,11 @@
 
     .header {
       z-index: 1;
+    }
+
+    .back_btn {
+      fill: #ffffff;
+      margin: 0 5px 0 0;
     }
 
     .content {

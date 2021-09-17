@@ -18,10 +18,6 @@
         },
         type: String,
       },
-      isButton: {
-        default: true,
-        type: Boolean,
-      },
       isPrimary: {
         default: false,
         type: Boolean,

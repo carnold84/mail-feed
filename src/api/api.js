@@ -6,8 +6,15 @@ export const loadLabels = async () => {
     userId: 'me',
   });
 
-  return response.result.labels.filter(({ name }) => {
+  const labels = response.result.labels.filter(({ name }) => {
     return name.includes('newsly_');
+  });
+
+  return labels.map((label) => {
+    return {
+      ...label,
+      name: label.name.replace('newsly_', ''),
+    };
   });
 };
 
@@ -17,7 +24,10 @@ export const loadLabel = async (labelId) => {
     userId: 'me',
   });
 
-  return response.result;
+  return {
+    ...response.result,
+    name: response.result.name.replace('newsly_', ''),
+  };
 };
 
 export const loadLabelMessages = async (labelId) => {

@@ -60,6 +60,11 @@
       border-bottom: #ffffff dotted 1px;
     }
 
+    &:visited {
+      border-bottom: #791ece dotted 1px;
+      color: #791ece;
+    }
+
     &:hover {
       border-bottom: var(--secondary) dotted 1px;
       color: var(--secondary);

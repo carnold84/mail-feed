@@ -2,9 +2,19 @@
   <div class="v_message">
     <c-header-bar>
       <template v-slot:content-left>
-        <c-button @click="$router.back()">
-          Back
-        </c-button>
+        <c-icon-button class="back_btn" @click="$router.back()">
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7.83 11L11.41 7.41L10 6L4 12L10 18L11.41 16.59L7.83 13H20V11H7.83Z"
+            />
+          </svg>
+        </c-icon-button>
+        <c-typography style="margin: 0;">{{ message?.subject }}</c-typography>
       </template>
     </c-header-bar>
     <main class="content">
@@ -15,12 +25,13 @@
 </template>
 
 <script>
-  import CButton from '@/components/CButton';
   import CHeaderBar from '@/components/CHeaderBar';
+  import CIconButton from '@/components/CIconButton';
+  import CTypography from '../components/CTypography.vue';
 
   export default {
     name: 'Message',
-    components: { CButton, CHeaderBar },
+    components: { CIconButton, CHeaderBar, CTypography },
     data() {
       return {
         isLoading: false,
@@ -89,6 +100,11 @@
     .header {
       height: 40px;
       width: 100%;
+    }
+
+    .back_btn {
+      fill: #ffffff;
+      margin: 0 5px 0 0;
     }
 
     .content {
