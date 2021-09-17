@@ -33,6 +33,7 @@
             name: 'Message',
             params: { labelId: label.id, messageId: message.id },
           }"
+          :isVisited="message.isRead"
         />
       </div>
     </main>

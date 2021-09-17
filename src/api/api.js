@@ -8,6 +8,21 @@ const formatLabel = (label) => {
   return capitalizeFirstLetter(label);
 };
 
+const formatMessage = ({ result }) => {
+  if (!result) {
+    return;
+  }
+
+  return {
+    id: result.id,
+    isRead: result.labelIds.indexOf('UNREAD') === -1,
+    content: extractContent(result),
+    date: extractField(result, 'Date'),
+    from: extractField(result, 'From').replace(/<.*?>\s?/g, ''),
+    subject: extractField(result, 'Subject'),
+  };
+};
+
 export const loadLabels = async () => {
   const response = await gapi.client.gmail.users.labels.list({
     userId: 'me',
@@ -58,14 +73,8 @@ export const loadLabelMessages = async (labelId) => {
     })
   );
 
-  return messageResponse.map(({ result }) => {
-    return {
-      id: result.id,
-      content: extractContent(result),
-      date: extractField(result, 'Date'),
-      from: extractField(result, 'From').replace(/<.*?>\s?/g, ''),
-      subject: extractField(result, 'Subject'),
-    };
+  return messageResponse.map((message) => {
+    return formatMessage(message);
   });
 };
 
@@ -75,13 +84,25 @@ export const loadLabelMessage = async (messageId) => {
     userId: 'me',
   });
 
-  return {
-    id: message?.result.id,
-    content: extractContent(message?.result),
-    date: extractField(message?.result, 'Date'),
-    from: extractField(message?.result, 'From').replace(/<.*?>\s?/g, ''),
-    subject: extractField(message?.result, 'Subject'),
-  };
+  return formatMessage(message);
+};
+
+export const markMessageRead = async (messageId, isRead) => {
+  let resource;
+
+  if (isRead) {
+    resource = { removeLabelIds: ['UNREAD'] };
+  } else {
+    resource = { addLabelIds: ['UNREAD'] };
+  }
+
+  await gapi.client.gmail.users.messages.modify({
+    id: messageId,
+    resource,
+    userId: 'me',
+  });
+
+  return await loadLabelMessage(messageId);
 };
 
 export const signIn = async () => {
@@ -107,7 +128,7 @@ export const initClient = (onSignIn) => {
           discoveryDocs: [
             'https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest',
           ],
-          scope: 'https://www.googleapis.com/auth/gmail.readonly',
+          scope: 'https://www.googleapis.com/auth/gmail.modify',
         })
         .then(
           () => {

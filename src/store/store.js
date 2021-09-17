@@ -64,10 +64,21 @@ export default createStore({
     async loadLabels({ commit }) {
       const labels = await api.loadLabels();
 
+      labels.forEach((label) => {
+        label.messages = {
+          allIds: [],
+          byId: {},
+        };
+      });
+
       commit('setLabels', labels);
     },
     async loadLabel({ commit }, labelId) {
       const label = await api.loadLabel(labelId);
+      label.messages = {
+        allIds: [],
+        byId: {},
+      };
 
       commit('setLabel', label);
     },
@@ -81,6 +92,11 @@ export default createStore({
 
       commit('setLabelMessage', { labelId, message });
     },
+    async markMessageRead({ commit }, { labelId, messageId, isRead }) {
+      const message = await api.markMessageRead(messageId, isRead);
+
+      commit('setLabelMessage', { labelId, message });
+    },
     setInitialRoute({ commit }, route) {
       commit('setInitialRoute', route);
     },
@@ -90,7 +106,6 @@ export default createStore({
       commit('setSignedIn', true);
     },
     async signOut({ commit }) {
-      console.log('signOut');
       await api.signOut();
 
       commit('setSignedIn', false);
@@ -118,29 +133,17 @@ export default createStore({
     setLabelMessage(state, { labelId, message }) {
       const label = state.labels.byId[labelId];
 
-      if (!label?.messages) {
-        label.messages = {
-          allIds: [],
-          byId: {},
-        };
-      }
-
       label.messages.byId[message.id] = message;
     },
     setLabelMessages(state, { labelId, messages }) {
-      const nextMessages = {
-        allIds: [],
-        byId: {},
-      };
-      messages.forEach((message) => {
-        if (nextMessages.allIds.indexOf(message.id) === -1) {
-          nextMessages.allIds.push(message.id);
-        }
-        nextMessages.byId[message.id] = message;
-      });
       const label = state.labels.byId[labelId];
+      messages.forEach((message) => {
+        if (label.messages.allIds.indexOf(message.id) === -1) {
+          label.messages.allIds.push(message.id);
+        }
+        label.messages.byId[message.id] = message;
+      });
       label.isLoaded = true;
-      label.messages = nextMessages;
     },
     setSignedIn(state, isSignedIn) {
       state.isSignedIn = isSignedIn;
