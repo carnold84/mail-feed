@@ -1,6 +1,13 @@
 /* global gapi */
 import { extractContent, extractField } from '@/utils/email';
 
+const formatLabel = (label) => {
+  const capitalizeFirstLetter = ([first, ...rest]) => {
+    return `${first.toUpperCase()}${rest.join('')}`;
+  };
+  return capitalizeFirstLetter(label);
+};
+
 export const loadLabels = async () => {
   const response = await gapi.client.gmail.users.labels.list({
     userId: 'me',
@@ -11,9 +18,12 @@ export const loadLabels = async () => {
   });
 
   return labels.map((label) => {
+    let name = label.name.replace('newsly_', '');
+    name = formatLabel(name);
+
     return {
       ...label,
-      name: label.name.replace('newsly_', ''),
+      name,
     };
   });
 };
@@ -24,9 +34,12 @@ export const loadLabel = async (labelId) => {
     userId: 'me',
   });
 
+  let name = response.result.name.replace('newsly_', '');
+  name = formatLabel(name);
+
   return {
     ...response.result,
-    name: response.result.name.replace('newsly_', ''),
+    name,
   };
 };
 

@@ -18,7 +18,9 @@
       </template>
     </c-header-bar>
     <main class="content">
-      <p v-if="isLoading" style="height: 200px;">Loading...</p>
+      <c-typography v-if="isLoading" style="height: 200px;">
+        Loading...
+      </c-typography>
       <div v-else class="list">
         <c-card
           v-for="message in messages"
@@ -64,7 +66,12 @@
         return this.$store.getters.getLabelById(this.labelId);
       },
       messages() {
-        return this.$store.getters.getMessagesByLabel(this.labelId);
+        return this.$store.getters.getMessagesByLabel(this.labelId, {
+          sortBy: {
+            direction: 'desc',
+            field: 'date',
+          },
+        });
       },
     },
     async mounted() {

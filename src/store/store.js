@@ -34,16 +34,25 @@ export default createStore({
       const label = state.labels.byId[labelId];
       return label?.messages?.byId[messageId];
     },
-    getMessagesByLabel: (state) => (id) => {
+    getMessagesByLabel: (state) => (id, { sortBy }) => {
       const label = state.labels.byId[id];
 
       if (!label?.messages) {
         return undefined;
       }
 
-      return label?.messages.allIds.map((id) => {
+      let labels = label?.messages.allIds.map((id) => {
         return label.messages.byId[id];
       });
+      labels.sort((a, b) => {
+        if (sortBy.direction === 'desc') {
+          return new Date(b[sortBy.field]) - new Date(a[sortBy.field]);
+        } else {
+          return new Date(a[sortBy.field]) - new Date(b[sortBy.field]);
+        }
+      });
+
+      return labels;
     },
   },
   actions: {
