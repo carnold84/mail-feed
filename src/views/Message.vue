@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh lpr lFf">
     <q-header>
-      <q-toolbar>
+      <q-toolbar class="text-primary bg-white g_tool_bar">
         <q-btn
           flat
           round
@@ -10,10 +10,10 @@
           :to="{ name: 'Label', params: { labelId } }"
         />
         <q-toolbar-title>
-          <h3 class="text-subtitle2 title_text">
+          <h3 class="text-subtitle1 title_text">
             {{ message?.from }}
           </h3>
-          <h4 class="text-caption title_text">
+          <h4 class="text-subtitle2 title_text">
             {{ message?.subject }}
           </h4>
         </q-toolbar-title>
@@ -122,7 +122,7 @@
     white-space: nowrap;
 
     &:nth-child(2) {
-      margin: 2px 0 0;
+      margin: 4px 0 0;
     }
   }
 

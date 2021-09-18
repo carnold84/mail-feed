@@ -1,10 +1,12 @@
 <template>
   <q-layout view="lHh lpr lFf">
     <q-header>
-      <q-toolbar>
+      <q-toolbar class="text-primary bg-white g_tool_bar">
         <q-btn flat round dense icon="arrow_back" :to="{ name: 'Home' }" />
         <q-toolbar-title>
-          {{ label?.name }}
+          <h3 class="text-subtitle1 title_text">
+            {{ label?.name }}
+          </h3>
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
@@ -110,6 +112,13 @@
 </script>
 
 <style lang="scss" scoped>
+  .title_text {
+    margin: 2px 0 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .meta {
     align-items: center;
     display: flex;
