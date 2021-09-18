@@ -9,7 +9,7 @@
       </q-toolbar>
     </q-header>
     <q-page-container>
-      <q-page class="q-pa-lg">
+      <q-page class="q-pa-md">
         <c-loading v-if="isLoading" />
         <q-list v-else separator>
           <q-item
@@ -23,14 +23,25 @@
             v-ripple
           >
             <q-item-section>
-              <q-item-label>{{ message.from }}</q-item-label>
-              <q-item-label>{{ message.subject }}</q-item-label>
-            </q-item-section>
-
-            <q-item-section side top>
-              <q-item-label caption>{{
-                formatDate(message.date)
-              }}</q-item-label>
+              <q-item-label>
+                <span class="text-weight-bold">
+                  {{ message.from }}
+                </span>
+              </q-item-label>
+              <q-item-label :lines="1" style="margin-top: 7px;">
+                {{ message.subject }}
+              </q-item-label>
+              <div class="meta">
+                <q-item-label caption>{{
+                  formatDate(message.date)
+                }}</q-item-label>
+                <q-badge
+                  v-if="!message.isRead"
+                  outline
+                  color="grey"
+                  label="Unread"
+                />
+              </div>
             </q-item-section>
           </q-item>
         </q-list>
@@ -99,26 +110,11 @@
 </script>
 
 <style lang="scss" scoped>
-  .v_label {
+  .meta {
+    align-items: center;
     display: flex;
-    flex-direction: column;
-    min-height: 100%;
-    width: 100%;
-
-    .header {
-      z-index: 1;
-    }
-
-    .back_btn {
-      fill: #ffffff;
-      margin: 0 5px 0 0;
-    }
-
-    .content {
-      background-color: #ffffff;
-      flex-grow: 1;
-      padding: 30px;
-      position: relative;
-    }
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 7px 0 0;
   }
 </style>

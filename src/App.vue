@@ -11,3 +11,9 @@
     name: 'Home',
   };
 </script>
+
+<style lang="scss">
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+</style>

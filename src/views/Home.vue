@@ -30,7 +30,7 @@
       </q-toolbar>
     </q-header>
     <q-page-container>
-      <q-page class="q-pa-lg">
+      <q-page class="q-pa-md">
         <c-loading v-if="isLoading" />
         <q-list v-else separator>
           <q-item
@@ -40,6 +40,9 @@
             clickable
             v-ripple
           >
+            <q-item-section side>
+              <q-icon name="label" />
+            </q-item-section>
             <q-item-section>{{ label.name }}</q-item-section>
           </q-item>
         </q-list>

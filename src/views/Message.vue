@@ -10,15 +10,20 @@
           :to="{ name: 'Label', params: { labelId } }"
         />
         <q-toolbar-title>
-          {{ message?.subject }}
+          <h3 class="text-subtitle2 title_text">
+            {{ message?.from }}
+          </h3>
+          <h4 class="text-caption title_text">
+            {{ message?.subject }}
+          </h4>
         </q-toolbar-title>
         <q-btn
           :disable="message === undefined"
           flat
           round
           dense
-          :icon="message?.isRead ? 'mark_email_unread' : 'mark_email_read'"
-          @click="onToggleRead"
+          icon="mark_as_unread"
+          @click="onMarkUnread"
         />
       </q-toolbar>
     </q-header>
@@ -84,24 +89,43 @@
       }
 
       if (this.message.isRead === false) {
-        this.onToggleRead();
+        await this.toggleRead(true);
       }
 
       this.isLoading = false;
     },
     methods: {
-      onToggleRead() {
-        this.$store.dispatch('markMessageRead', {
+      async toggleRead(isRead) {
+        return await this.$store.dispatch('markMessageRead', {
           labelId: this.labelId,
           messageId: this.messageId,
-          isRead: !this.message?.isRead,
+          isRead,
         });
+      },
+      async onMarkUnread() {
+        await this.toggleRead(false);
+
+        this.$router.push({ name: 'Label', params: { labelId: this.labelId } });
+
+        this.$q.notify(`Marked as ${this.message.isRead ? 'Read' : 'Unread'}`);
       },
     },
   };
 </script>
 
 <style lang="scss" scoped>
+  .title_text {
+    line-height: 1rem;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:nth-child(2) {
+      margin: 2px 0 0;
+    }
+  }
+
   .iframe {
     border: none;
     height: 100%;
