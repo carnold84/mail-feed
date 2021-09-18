@@ -51,7 +51,6 @@ export const extractContent = (message) => {
   const part = message.payload.parts.filter((part) => {
     return part.mimeType == 'text/html';
   })[0];
-  const string = UTF8ArrToStr(Buffer.from(part.body.data, 'base64'));
 
-  return string.replace('\r', '').replace('\n', '');
+  return UTF8ArrToStr(Buffer.from(part.body.data, 'base64'));
 };

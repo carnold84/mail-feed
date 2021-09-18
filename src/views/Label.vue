@@ -1,58 +1,64 @@
 <template>
-  <div class="v_label">
-    <c-header-bar class="header">
-      <template v-slot:content-left>
-        <c-icon-button class="back_btn" @click="$router.back()">
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
+  <q-layout view="lHh lpr lFf">
+    <q-header>
+      <q-toolbar class="text-primary bg-white g_tool_bar">
+        <q-btn flat round dense icon="arrow_back" :to="{ name: 'Home' }" />
+        <q-toolbar-title>
+          <h3 class="text-subtitle1 title_text">
+            {{ label?.name }}
+          </h3>
+        </q-toolbar-title>
+      </q-toolbar>
+    </q-header>
+    <q-page-container>
+      <q-page class="q-pa-md">
+        <c-loading v-if="isLoading" />
+        <q-list v-else separator>
+          <q-item
+            v-for="message in messages"
+            clickable
+            :key="message.id"
+            :to="{
+              name: 'Message',
+              params: { labelId: label.id, messageId: message.id },
+            }"
+            v-ripple
           >
-            <path
-              d="M7.83 11L11.41 7.41L10 6L4 12L10 18L11.41 16.59L7.83 13H20V11H7.83Z"
-            />
-          </svg>
-        </c-icon-button>
-        <c-typography style="margin: 0;">{{ label?.name }}</c-typography>
-      </template>
-    </c-header-bar>
-    <main class="content">
-      <c-typography v-if="isLoading" style="height: 200px;">
-        Loading...
-      </c-typography>
-      <div v-else class="list">
-        <c-card
-          v-for="message in messages"
-          component="router-link"
-          :key="message.id"
-          :meta="formatDate(message.date)"
-          :subTitle="message.subject"
-          :title="message.from"
-          :to="{
-            name: 'Message',
-            params: { labelId: label.id, messageId: message.id },
-          }"
-          :isVisited="message.isRead"
-        />
-      </div>
-    </main>
-  </div>
+            <q-item-section>
+              <q-item-label>
+                <span class="text-weight-bold">
+                  {{ message.from }}
+                </span>
+              </q-item-label>
+              <q-item-label :lines="1" style="margin-top: 7px;">
+                {{ message.subject }}
+              </q-item-label>
+              <div class="meta">
+                <q-item-label caption>{{
+                  formatDate(message.date)
+                }}</q-item-label>
+                <q-badge
+                  v-if="!message.isRead"
+                  outline
+                  color="grey"
+                  label="Unread"
+                />
+              </div>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-page>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script>
-  import CCard from '../components/CCard.vue';
-  import CHeaderBar from '@/components/CHeaderBar';
-  import CIconButton from '@/components/CIconButton';
-  import CTypography from '../components/CTypography.vue';
+  import CLoading from '@/components/CLoading';
 
   export default {
     name: 'Label',
     components: {
-      CCard,
-      CIconButton,
-      CHeaderBar,
-      CTypography,
+      CLoading,
     },
     data() {
       return {
@@ -106,26 +112,18 @@
 </script>
 
 <style lang="scss" scoped>
-  .v_label {
+  .title_text {
+    margin: 2px 0 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .meta {
+    align-items: center;
     display: flex;
-    flex-direction: column;
-    min-height: 100%;
-    width: 100%;
-
-    .header {
-      z-index: 1;
-    }
-
-    .back_btn {
-      fill: #ffffff;
-      margin: 0 5px 0 0;
-    }
-
-    .content {
-      background-color: #ffffff;
-      flex-grow: 1;
-      padding: 30px;
-      position: relative;
-    }
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 7px 0 0;
   }
 </style>
