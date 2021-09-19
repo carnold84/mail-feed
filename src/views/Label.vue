@@ -16,6 +16,7 @@
         <q-list v-else separator>
           <q-item
             v-for="message in messages"
+            :class="{ is_read: message.isRead }"
             clickable
             :key="message.id"
             :to="{
@@ -112,6 +113,10 @@
 </script>
 
 <style lang="scss" scoped>
+  .is_read {
+    opacity: 0.5;
+  }
+
   .title_text {
     margin: 2px 0 0;
     overflow: hidden;
