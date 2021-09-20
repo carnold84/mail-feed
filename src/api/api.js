@@ -1,10 +1,12 @@
 /* global gapi */
 import { extractContent, extractField } from '@/utils/email';
 
+const capitalizeFirstLetter = ([first, ...rest]) => {
+  return `${first.toUpperCase()}${rest.join('')}`;
+};
+
 const formatLabel = (label) => {
-  const capitalizeFirstLetter = ([first, ...rest]) => {
-    return `${first.toUpperCase()}${rest.join('')}`;
-  };
+  label = label.replace('newsly_', '');
   return capitalizeFirstLetter(label);
 };
 
@@ -28,19 +30,20 @@ export const loadLabels = async () => {
     userId: 'me',
   });
 
-  const labels = response.result.labels.filter(({ name }) => {
+  console.log(response);
+
+  const filteredLabels = response.result.labels.filter(({ name }) => {
     return name.includes('newsly_');
   });
 
-  return labels.map((label) => {
-    let name = label.name.replace('newsly_', '');
-    name = formatLabel(name);
+  const labelsResponse = await Promise.all(
+    filteredLabels.map(({ id }) => {
+      return loadLabel(id);
+    })
+  );
+  console.log(labelsResponse);
 
-    return {
-      ...label,
-      name,
-    };
-  });
+  return labelsResponse;
 };
 
 export const loadLabel = async (labelId) => {
@@ -49,20 +52,23 @@ export const loadLabel = async (labelId) => {
     userId: 'me',
   });
 
-  let name = response.result.name.replace('newsly_', '');
-  name = formatLabel(name);
+  console.log(response);
 
   return {
     ...response.result,
-    name,
+    name: formatLabel(response.result.name),
   };
 };
 
-export const loadLabelMessages = async (labelId) => {
+export const loadLabelMessages = async ({ labelId, maxResults, pageToken }) => {
   const messages = await gapi.client.gmail.users.messages.list({
     labelIds: [labelId],
+    maxResults,
+    pageToken,
     userId: 'me',
   });
+
+  console.log(messages);
 
   const messageResponse = await Promise.all(
     messages.result.messages.map(({ id }) => {
@@ -73,9 +79,15 @@ export const loadLabelMessages = async (labelId) => {
     })
   );
 
-  return messageResponse.map((message) => {
-    return formatMessage(message);
-  });
+  console.log(messageResponse);
+
+  return {
+    items: messageResponse.map((message) => {
+      return formatMessage(message);
+    }),
+    nextPageToken: messages.result.nextPageToken,
+    resultSizeEstimate: messages.result.resultSizeEstimate,
+  };
 };
 
 export const loadLabelMessage = async (messageId) => {

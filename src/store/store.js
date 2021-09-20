@@ -30,6 +30,14 @@ export default createStore({
         return state.labels.byId[id];
       });
     },
+    getLabelNextPageToken: (state) => (labelId) => {
+      const label = state.labels.byId[labelId];
+      return label?.nextPageToken;
+    },
+    getLabelPrevPageToken: (state) => (labelId) => {
+      const label = state.labels.byId[labelId];
+      return label?.prevPageToken;
+    },
     getMessageById: (state) => ({ labelId, messageId }) => {
       const label = state.labels.byId[labelId];
       return label?.messages?.byId[messageId];
@@ -71,6 +79,8 @@ export default createStore({
         };
       });
 
+      console.log(labels);
+
       commit('setLabels', labels);
     },
     async loadLabel({ commit }, labelId) {
@@ -82,10 +92,22 @@ export default createStore({
 
       commit('setLabel', label);
     },
-    async loadLabelMessages({ commit }, labelId) {
-      const messages = await api.loadLabelMessages(labelId);
+    async loadLabelMessages({ commit }, { labelId, maxResults, pageToken }) {
+      const response = await api.loadLabelMessages({
+        labelId,
+        maxResults,
+        pageToken,
+      });
 
-      commit('setLabelMessages', { labelId, messages });
+      commit('setLabelNextPageToken', {
+        labelId,
+        nextPageToken: response.nextPageToken,
+      });
+      commit('setLabelPrevPageToken', {
+        labelId,
+        prevPageToken: response.prevPageToken,
+      });
+      commit('setLabelMessages', { labelId, messages: response.items });
     },
     async loadLabelMessage({ commit }, { labelId, messageId }) {
       const message = await api.loadLabelMessage(messageId);
@@ -137,6 +159,11 @@ export default createStore({
     },
     setLabelMessages(state, { labelId, messages }) {
       const label = state.labels.byId[labelId];
+
+      label.isLoaded = false;
+      label.messages.byId = {};
+      label.messages.allIds = [];
+
       messages.forEach((message) => {
         if (label.messages.allIds.indexOf(message.id) === -1) {
           label.messages.allIds.push(message.id);
@@ -144,6 +171,16 @@ export default createStore({
         label.messages.byId[message.id] = message;
       });
       label.isLoaded = true;
+    },
+    setLabelNextPageToken(state, { labelId, nextPageToken }) {
+      const label = state.labels.byId[labelId];
+
+      label.nextPageToken = nextPageToken;
+    },
+    setLabelPrevPageToken(state, { labelId, prevPageToken }) {
+      const label = state.labels.byId[labelId];
+
+      label.prevPageToken = prevPageToken;
     },
     setSignedIn(state, isSignedIn) {
       state.isSignedIn = isSignedIn;

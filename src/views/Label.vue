@@ -8,6 +8,27 @@
             {{ label?.name }}
           </h3>
         </q-toolbar-title>
+        <div v-if="label" class="row items-center">
+          <p class="text-body q-ma-none" style="margin: 0 10px 0 0">
+            1 - 20 of {{ label.messagesTotal }}
+          </p>
+          <q-btn
+            flat
+            round
+            dense
+            :disable="!prevPageToken"
+            icon="chevron_left"
+            @click="onPrevMessages"
+          />
+          <q-btn
+            flat
+            round
+            dense
+            :disable="!nextPageToken"
+            icon="chevron_right"
+            @click="onNextMessages"
+          />
+        </div>
       </q-toolbar>
     </q-header>
     <q-page-container>
@@ -81,6 +102,12 @@
           },
         });
       },
+      nextPageToken() {
+        return this.$store.getters.getLabelNextPageToken(this.labelId);
+      },
+      prevPageToken() {
+        return this.$store.getters.getLabelPrevPageToken(this.labelId);
+      },
     },
     async mounted() {
       const requests = [];
@@ -90,7 +117,13 @@
       }
 
       if (!this.label?.isLoaded) {
-        requests.push(this.$store.dispatch('loadLabelMessages', this.labelId));
+        requests.push(
+          this.$store.dispatch('loadLabelMessages', {
+            labelId: this.labelId,
+            maxResults: 20,
+            pageToken: this.pageToken,
+          })
+        );
       }
 
       if (requests.length > 0) {
@@ -107,6 +140,32 @@
           dateStyle: 'full',
         });
         return dateTime.format(new Date(date));
+      },
+      async onNextMessages() {
+        console.log('onNextMessages');
+
+        this.isLoading = true;
+
+        await this.$store.dispatch('loadLabelMessages', {
+          labelId: this.labelId,
+          maxResults: 20,
+          pageToken: this.nextPageToken,
+        });
+
+        this.isLoading = false;
+      },
+      async onPrevMessages() {
+        console.log('onPrevMessages');
+
+        this.isLoading = true;
+
+        await this.$store.dispatch('loadLabelMessages', {
+          labelId: this.labelId,
+          maxResults: 20,
+          pageToken: this.nextPageToken,
+        });
+
+        this.isLoading = false;
       },
     },
   };
