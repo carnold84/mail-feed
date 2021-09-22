@@ -90,8 +90,6 @@ export default createStore({
         return createLabel(label);
       });
 
-      console.log(labels);
-
       commit('setLabels', labels);
     },
     async loadLabel({ commit }, labelId) {

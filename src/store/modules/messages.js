@@ -10,22 +10,34 @@ export default {
       byId: {},
     },
     pageSize: 20,
+    showRead: true,
   },
   getters: {
+    getMessageById: (state) => (id) => {
+      return state.messages.byId[id];
+    },
     getAreMessagesLoaded: (state) => (labelId) => {
       const labelMessages = state.messages.byLabel[labelId];
 
       return labelMessages?.areLoaded;
     },
-    getMessagesByLabel: (state) => (labelId) => {
+    getMessagesByLabel: (state) => ({ labelId }) => {
       const messageIds = state.messages.byLabel[labelId]?.allIds;
 
       if (!messageIds) {
         return undefined;
       }
 
-      let messages = messageIds.map((id) => {
-        return state.messages.byId[id];
+      const messages = [];
+
+      messageIds.forEach((id) => {
+        const message = state.messages.byId[id];
+
+        if (state.showRead === true) {
+          messages.push(message);
+        } else if (message.isRead === false) {
+          messages.push(message);
+        }
       });
 
       return messages;
@@ -36,39 +48,45 @@ export default {
     getPageSize(state) {
       return state.pageSize;
     },
+    getShowRead(state) {
+      return state.showRead;
+    },
   },
   actions: {
     async fetchMessage({ commit }, { labelId, messageId }) {
       const message = await api.loadLabelMessage(messageId);
 
-      commit('setLabelMessage', { labelId, message });
+      commit('setMessageByLabel', { labelId, message });
     },
-    async fetchNextMessages({ commit, state }, { labelId }) {
-      console.log(state, state.pageSize);
+    async fetchNextMessages({ commit, state }, { labelId, reset = false }) {
+      if (reset) {
+        commit('setNextPageTokenByLabel', { labelId, nextPageToken: null });
+      }
+
       const response = await api.loadLabelMessages({
         labelId,
         maxResults: state.pageSize,
         pageToken: state.messages.byLabel[labelId]?.nextPageToken,
+        showRead: state.showRead,
       });
 
       commit('setMessagesByLabel', {
         labelId,
         messages: response.items,
         nextPageToken: response.nextPageToken,
+        reset,
       });
     },
-    async markMessageRead({ commit }, { labelId, messageId, isRead }) {
+    async markMessageRead({ commit }, { messageId, isRead }) {
       const message = await api.markMessageRead(messageId, isRead);
 
-      commit('setLabelMessage', { labelId, message });
+      commit('updateMessage', message);
+    },
+    setShowRead({ commit }, showRead) {
+      commit('setShowRead', showRead);
     },
   },
   mutations: {
-    setLabelMessage(state, { labelId, message }) {
-      const label = state.labels.byId[labelId];
-
-      label.messages.byId[message.id] = message;
-    },
     setLabelMessages(state, { labelId, messages }) {
       const label = state.labels.byId[labelId];
 
@@ -88,10 +106,25 @@ export default {
       const labelMessages = state.messages.byLabel[labelId];
       labelMessages.nextPageToken = nextPageToken;
     },
-    setMessagesByLabel(state, { labelId, messages, nextPageToken }) {
+    setMessageByLabel(state, { labelId, message }) {
       let labelMessages = state.messages.byLabel[labelId];
 
       if (!labelMessages) {
+        labelMessages = {
+          allIds: [],
+          nextPageToken: null,
+        };
+      }
+
+      state.messages.byId[message.id] = message;
+      labelMessages.allIds.push(message.id);
+
+      state.messages.byLabel[labelId] = labelMessages;
+    },
+    setMessagesByLabel(state, { labelId, messages, nextPageToken, reset }) {
+      let labelMessages = state.messages.byLabel[labelId];
+
+      if (!labelMessages || reset) {
         labelMessages = {
           allIds: [],
           nextPageToken: null,
@@ -106,6 +139,12 @@ export default {
       labelMessages.areLoaded = true;
 
       state.messages.byLabel[labelId] = labelMessages;
+    },
+    setShowRead(state, showRead) {
+      state.showRead = showRead;
+    },
+    updateMessage(state, message) {
+      state.messages.byId[message.id] = message;
     },
   },
   modules: {},

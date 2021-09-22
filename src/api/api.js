@@ -30,8 +30,6 @@ export const loadLabels = async () => {
     userId: 'me',
   });
 
-  console.log(response);
-
   const filteredLabels = response.result.labels.filter(({ name }) => {
     return name.includes('newsly_');
   });
@@ -41,7 +39,6 @@ export const loadLabels = async () => {
       return loadLabel(id);
     })
   );
-  console.log(labelsResponse);
 
   return labelsResponse;
 };
@@ -52,23 +49,25 @@ export const loadLabel = async (labelId) => {
     userId: 'me',
   });
 
-  console.log(response);
-
   return {
     ...response.result,
     name: formatLabel(response.result.name),
   };
 };
 
-export const loadLabelMessages = async ({ labelId, maxResults, pageToken }) => {
+export const loadLabelMessages = async ({
+  labelId,
+  maxResults,
+  pageToken,
+  showRead,
+}) => {
   const messages = await gapi.client.gmail.users.messages.list({
     labelIds: [labelId],
     maxResults,
     pageToken,
+    q: showRead === false ? 'is:unread' : null,
     userId: 'me',
   });
-
-  console.log(messages);
 
   const messageResponse = await Promise.all(
     messages.result.messages.map(({ id }) => {
@@ -78,8 +77,6 @@ export const loadLabelMessages = async ({ labelId, maxResults, pageToken }) => {
       });
     })
   );
-
-  console.log(messageResponse);
 
   return {
     items: messageResponse.map((message) => {

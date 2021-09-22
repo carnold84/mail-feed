@@ -8,6 +8,12 @@
             {{ label?.name }}
           </h3>
         </q-toolbar-title>
+        <q-toggle
+          v-model="showRead"
+          label="Show Read"
+          left-label
+          @update:model-value="onToggleShowRead"
+        />
       </q-toolbar>
     </q-header>
     <q-page-container>
@@ -47,6 +53,18 @@
               </div>
             </q-item-section>
           </q-item>
+          <q-item style="justify-content: center;">
+            <q-btn
+              color="primary"
+              :loading="isLoadingMore"
+              rounded
+              style="margin: 10px 0;"
+              unelevated
+              @click="onLoadMore"
+            >
+              Load More
+            </q-btn>
+          </q-item>
         </q-list>
       </q-page>
     </q-page-container>
@@ -64,6 +82,8 @@
     data() {
       return {
         isLoading: false,
+        isLoadingMore: false,
+        showRead: this.$store.getters['messages/getShowRead'],
       };
     },
     computed: {
@@ -79,15 +99,9 @@
         return this.$store.getters['labels/getLabelById'](this.labelId);
       },
       messages() {
-        return this.$store.getters['messages/getMessagesByLabel'](
-          this.labelId,
-          {
-            sortBy: {
-              direction: 'desc',
-              field: 'date',
-            },
-          }
-        );
+        return this.$store.getters['messages/getMessagesByLabel']({
+          labelId: this.labelId,
+        });
       },
     },
     async mounted() {
@@ -98,11 +112,7 @@
       }
 
       if (!this.areMessagesLoaded) {
-        requests.push(
-          this.$store.dispatch('messages/fetchNextMessages', {
-            labelId: this.labelId,
-          })
-        );
+        requests.push(this.loadMore());
       }
 
       if (requests.length > 0) {
@@ -114,6 +124,28 @@
       }
     },
     methods: {
+      async loadMore(reset = false) {
+        await this.$store.dispatch('messages/fetchNextMessages', {
+          labelId: this.labelId,
+          reset,
+        });
+      },
+      async onLoadMore() {
+        this.isLoadingMore = true;
+
+        await this.loadMore();
+
+        this.isLoadingMore = false;
+      },
+      async onToggleShowRead(value) {
+        this.isLoading = true;
+
+        this.$store.dispatch('messages/setShowRead', value);
+
+        await this.loadMore(true);
+
+        this.isLoading = false;
+      },
       formatDate(date) {
         const dateTime = new Intl.DateTimeFormat('en-GB', {
           dateStyle: 'full',
