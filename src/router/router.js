@@ -55,16 +55,16 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  const isSignedIn = store.getters.isSignedIn;
-  const initialRoute = store.getters.initialRoute;
+  const isSignedIn = store.getters['auth/isSignedIn'];
+  const initialRoute = store.getters['auth/initialRoute'];
 
   if (isSignedIn === undefined && initialRoute === undefined) {
     if (to.meta.shouldAuth === false) {
       // redirect to home once logged in
-      store.dispatch('setInitialRoute', '/home');
+      store.dispatch('auth/setInitialRoute', '/home');
     } else {
       // redirect to wherever it was going once logged in
-      store.dispatch('setInitialRoute', to.path);
+      store.dispatch('auth/setInitialRoute', to.path);
     }
     next({ name: 'Splash' });
   } else if (isSignedIn === undefined && to.name === 'Splash') {

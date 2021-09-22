@@ -8,27 +8,6 @@
             {{ label?.name }}
           </h3>
         </q-toolbar-title>
-        <div v-if="label" class="row items-center">
-          <p class="text-body q-ma-none" style="margin: 0 10px 0 0">
-            1 - 20 of {{ label.messagesTotal }}
-          </p>
-          <q-btn
-            flat
-            round
-            dense
-            :disable="!prevPageToken"
-            icon="chevron_left"
-            @click="onPrevMessages"
-          />
-          <q-btn
-            flat
-            round
-            dense
-            :disable="!nextPageToken"
-            icon="chevron_right"
-            @click="onNextMessages"
-          />
-        </div>
       </q-toolbar>
     </q-header>
     <q-page-container>
@@ -88,40 +67,40 @@
       };
     },
     computed: {
+      areMessagesLoaded() {
+        return this.$store.getters['messages/getAreMessagesLoaded'](
+          this.labelId
+        );
+      },
       labelId() {
         return this.$route?.params?.labelId;
       },
       label() {
-        return this.$store.getters.getLabelById(this.labelId);
+        return this.$store.getters['labels/getLabelById'](this.labelId);
       },
       messages() {
-        return this.$store.getters.getMessagesByLabel(this.labelId, {
-          sortBy: {
-            direction: 'desc',
-            field: 'date',
-          },
-        });
-      },
-      nextPageToken() {
-        return this.$store.getters.getLabelNextPageToken(this.labelId);
-      },
-      prevPageToken() {
-        return this.$store.getters.getLabelPrevPageToken(this.labelId);
+        return this.$store.getters['messages/getMessagesByLabel'](
+          this.labelId,
+          {
+            sortBy: {
+              direction: 'desc',
+              field: 'date',
+            },
+          }
+        );
       },
     },
     async mounted() {
       const requests = [];
 
       if (!this.label) {
-        requests.push(this.$store.dispatch('loadLabel', this.labelId));
+        requests.push(this.$store.dispatch('labels/fetchLabel', this.labelId));
       }
 
-      if (!this.label?.isLoaded) {
+      if (!this.areMessagesLoaded) {
         requests.push(
-          this.$store.dispatch('loadLabelMessages', {
+          this.$store.dispatch('messages/fetchNextMessages', {
             labelId: this.labelId,
-            maxResults: 20,
-            pageToken: this.pageToken,
           })
         );
       }
@@ -140,32 +119,6 @@
           dateStyle: 'full',
         });
         return dateTime.format(new Date(date));
-      },
-      async onNextMessages() {
-        console.log('onNextMessages');
-
-        this.isLoading = true;
-
-        await this.$store.dispatch('loadLabelMessages', {
-          labelId: this.labelId,
-          maxResults: 20,
-          pageToken: this.nextPageToken,
-        });
-
-        this.isLoading = false;
-      },
-      async onPrevMessages() {
-        console.log('onPrevMessages');
-
-        this.isLoading = true;
-
-        await this.$store.dispatch('loadLabelMessages', {
-          labelId: this.labelId,
-          maxResults: 20,
-          pageToken: this.nextPageToken,
-        });
-
-        this.isLoading = false;
       },
     },
   };

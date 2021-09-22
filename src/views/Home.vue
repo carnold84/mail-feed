@@ -53,26 +53,26 @@
         isLoading: false,
       };
     },
+    computed: {
+      areLabelsLoaded() {
+        return this.$store.getters['labels/areLabelsLoaded'];
+      },
+      labels() {
+        return this.$store.getters['labels/getAllLabels'];
+      },
+    },
     async mounted() {
       if (this.areLabelsLoaded === false) {
         this.isLoading = true;
 
-        await this.$store.dispatch('loadLabels');
+        await this.$store.dispatch('labels/fetchLabels');
 
         this.isLoading = false;
       }
     },
-    computed: {
-      areLabelsLoaded() {
-        return this.$store.getters.areLabelsLoaded;
-      },
-      labels() {
-        return this.$store.getters.getAllLabels;
-      },
-    },
     methods: {
       async signOut() {
-        await this.$store.dispatch('signOut');
+        await this.$store.dispatch('auth/signOut');
 
         this.$router.push('/sign-in');
       },

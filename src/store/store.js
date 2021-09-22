@@ -1,6 +1,16 @@
 import { createStore } from 'vuex';
 import api from '@/api';
 
+const createLabel = (data) => {
+  return {
+    ...data,
+    messages: {
+      byId: {},
+      pages: [],
+    },
+  };
+};
+
 export default createStore({
   strict: true,
   state: {
@@ -8,6 +18,7 @@ export default createStore({
       allIds: [],
       byId: {},
       isLoaded: false,
+      pageSize: 20,
     },
     initialRoute: undefined,
     isSignedIn: undefined,
@@ -62,6 +73,9 @@ export default createStore({
 
       return labels;
     },
+    getPageSize(state) {
+      return state.labels.pageSize;
+    },
   },
   actions: {
     async init({ commit }) {
@@ -72,11 +86,8 @@ export default createStore({
     async loadLabels({ commit }) {
       const labels = await api.loadLabels();
 
-      labels.forEach((label) => {
-        label.messages = {
-          allIds: [],
-          byId: {},
-        };
+      labels.map((label) => {
+        return createLabel(label);
       });
 
       console.log(labels);
@@ -84,11 +95,8 @@ export default createStore({
       commit('setLabels', labels);
     },
     async loadLabel({ commit }, labelId) {
-      const label = await api.loadLabel(labelId);
-      label.messages = {
-        allIds: [],
-        byId: {},
-      };
+      const response = await api.loadLabel(labelId);
+      const label = createLabel(response);
 
       commit('setLabel', label);
     },
@@ -97,6 +105,30 @@ export default createStore({
         labelId,
         maxResults,
         pageToken,
+      });
+
+      commit('setLabelNextPageToken', {
+        labelId,
+        nextPageToken: response.nextPageToken,
+      });
+      commit('setLabelPrevPageToken', {
+        labelId,
+        prevPageToken: response.prevPageToken,
+      });
+      commit('setLabelMessages', { labelId, messages: response.items });
+    },
+    async getNextPage({ commit, getters }, { labelId, pageIndex }) {
+      const result = getters.getLabelPage({ labelId, pageIndex });
+
+      if (result) {
+        commit('setLabelMessages', { labelId, messages: response.items });
+      }
+
+      const pageSize = getters.getPageSize;
+      const response = await api.loadLabelMessages({
+        labelId,
+        maxResults: pageSize,
+        pageToken: getters.getLabelNextPageToken,
       });
 
       commit('setLabelNextPageToken', {

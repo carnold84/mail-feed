@@ -52,10 +52,10 @@
         return this.$route?.params?.labelId;
       },
       label() {
-        return this.$store.getters.getLabelById(this.labelId);
+        return this.$store.getters['messages/getLabelById'](this.labelId);
       },
       message() {
-        return this.$store.getters.getMessageById({
+        return this.$store.getters['messages/getMessageById']({
           labelId: this.labelId,
           messageId: this.messageId,
         });
@@ -78,11 +78,11 @@
       this.isLoading = true;
 
       if (!this.label) {
-        await this.$store.dispatch('loadLabel', this.labelId);
+        await this.$store.dispatch('labels/loadLabel', this.labelId);
       }
 
       if (!this.label?.isLoaded) {
-        await this.$store.dispatch('loadLabelMessage', {
+        await this.$store.dispatch('messages/loadLabelMessage', {
           labelId: this.labelId,
           messageId: this.messageId,
         });
@@ -96,7 +96,7 @@
     },
     methods: {
       async toggleRead(isRead) {
-        return await this.$store.dispatch('markMessageRead', {
+        return await this.$store.dispatch('messages/markMessageRead', {
           labelId: this.labelId,
           messageId: this.messageId,
           isRead,

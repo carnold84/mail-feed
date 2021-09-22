@@ -15,8 +15,8 @@
     methods: {
       async signIn() {
         console.log('signing In!');
-        await this.$store.dispatch('signIn');
-        const initialRoute = this.$store.getters.initialRoute;
+        await this.$store.dispatch('auth/signIn');
+        const initialRoute = this.$store.getters['auth/initialRoute'];
 
         this.$router.push(initialRoute);
       },
