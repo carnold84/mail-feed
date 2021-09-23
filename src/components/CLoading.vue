@@ -1,6 +1,6 @@
 <template>
   <div class="c_loading">
-    <q-circular-progress color="blue" indeterminate size="md" />
+    <q-circular-progress color="primary" indeterminate size="md" />
   </div>
 </template>
 

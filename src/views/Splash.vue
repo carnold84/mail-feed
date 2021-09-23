@@ -8,9 +8,9 @@
   export default {
     name: 'Splash',
     async mounted() {
-      await this.$store.dispatch('init');
+      await this.$store.dispatch('auth/init');
 
-      const initialRoute = this.$store.getters.initialRoute;
+      const initialRoute = this.$store.getters['auth/initialRoute'];
 
       this.$router.push(initialRoute);
     },

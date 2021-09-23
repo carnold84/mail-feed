@@ -1,6 +1,16 @@
 import { createStore } from 'vuex';
 import api from '@/api';
 
+const createLabel = (data) => {
+  return {
+    ...data,
+    messages: {
+      byId: {},
+      pages: [],
+    },
+  };
+};
+
 export default createStore({
   strict: true,
   state: {
@@ -8,6 +18,7 @@ export default createStore({
       allIds: [],
       byId: {},
       isLoaded: false,
+      pageSize: 20,
     },
     initialRoute: undefined,
     isSignedIn: undefined,
@@ -29,6 +40,14 @@ export default createStore({
       return state.labels.allIds.map((id) => {
         return state.labels.byId[id];
       });
+    },
+    getLabelNextPageToken: (state) => (labelId) => {
+      const label = state.labels.byId[labelId];
+      return label?.nextPageToken;
+    },
+    getLabelPrevPageToken: (state) => (labelId) => {
+      const label = state.labels.byId[labelId];
+      return label?.prevPageToken;
     },
     getMessageById: (state) => ({ labelId, messageId }) => {
       const label = state.labels.byId[labelId];
@@ -54,6 +73,9 @@ export default createStore({
 
       return labels;
     },
+    getPageSize(state) {
+      return state.labels.pageSize;
+    },
   },
   actions: {
     async init({ commit }) {
@@ -64,28 +86,58 @@ export default createStore({
     async loadLabels({ commit }) {
       const labels = await api.loadLabels();
 
-      labels.forEach((label) => {
-        label.messages = {
-          allIds: [],
-          byId: {},
-        };
+      labels.map((label) => {
+        return createLabel(label);
       });
 
       commit('setLabels', labels);
     },
     async loadLabel({ commit }, labelId) {
-      const label = await api.loadLabel(labelId);
-      label.messages = {
-        allIds: [],
-        byId: {},
-      };
+      const response = await api.loadLabel(labelId);
+      const label = createLabel(response);
 
       commit('setLabel', label);
     },
-    async loadLabelMessages({ commit }, labelId) {
-      const messages = await api.loadLabelMessages(labelId);
+    async loadLabelMessages({ commit }, { labelId, maxResults, pageToken }) {
+      const response = await api.loadLabelMessages({
+        labelId,
+        maxResults,
+        pageToken,
+      });
 
-      commit('setLabelMessages', { labelId, messages });
+      commit('setLabelNextPageToken', {
+        labelId,
+        nextPageToken: response.nextPageToken,
+      });
+      commit('setLabelPrevPageToken', {
+        labelId,
+        prevPageToken: response.prevPageToken,
+      });
+      commit('setLabelMessages', { labelId, messages: response.items });
+    },
+    async getNextPage({ commit, getters }, { labelId, pageIndex }) {
+      const result = getters.getLabelPage({ labelId, pageIndex });
+
+      if (result) {
+        commit('setLabelMessages', { labelId, messages: response.items });
+      }
+
+      const pageSize = getters.getPageSize;
+      const response = await api.loadLabelMessages({
+        labelId,
+        maxResults: pageSize,
+        pageToken: getters.getLabelNextPageToken,
+      });
+
+      commit('setLabelNextPageToken', {
+        labelId,
+        nextPageToken: response.nextPageToken,
+      });
+      commit('setLabelPrevPageToken', {
+        labelId,
+        prevPageToken: response.prevPageToken,
+      });
+      commit('setLabelMessages', { labelId, messages: response.items });
     },
     async loadLabelMessage({ commit }, { labelId, messageId }) {
       const message = await api.loadLabelMessage(messageId);
@@ -137,6 +189,11 @@ export default createStore({
     },
     setLabelMessages(state, { labelId, messages }) {
       const label = state.labels.byId[labelId];
+
+      label.isLoaded = false;
+      label.messages.byId = {};
+      label.messages.allIds = [];
+
       messages.forEach((message) => {
         if (label.messages.allIds.indexOf(message.id) === -1) {
           label.messages.allIds.push(message.id);
@@ -144,6 +201,16 @@ export default createStore({
         label.messages.byId[message.id] = message;
       });
       label.isLoaded = true;
+    },
+    setLabelNextPageToken(state, { labelId, nextPageToken }) {
+      const label = state.labels.byId[labelId];
+
+      label.nextPageToken = nextPageToken;
+    },
+    setLabelPrevPageToken(state, { labelId, prevPageToken }) {
+      const label = state.labels.byId[labelId];
+
+      label.prevPageToken = prevPageToken;
     },
     setSignedIn(state, isSignedIn) {
       state.isSignedIn = isSignedIn;

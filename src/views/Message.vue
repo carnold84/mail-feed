@@ -18,11 +18,12 @@
           </h4>
         </q-toolbar-title>
         <q-btn
+          dense
           :disable="message === undefined"
           flat
-          round
-          dense
           icon="mark_as_unread"
+          :loading="isMarkingRead"
+          round
           @click="onMarkUnread"
         />
       </q-toolbar>
@@ -45,20 +46,23 @@
     data() {
       return {
         isLoading: false,
+        isMarkingRead: false,
       };
     },
     computed: {
+      areMessagesLoaded() {
+        return this.$store.getters['messages/getAreMessagesLoaded'](
+          this.labelId
+        );
+      },
       labelId() {
         return this.$route?.params?.labelId;
       },
       label() {
-        return this.$store.getters.getLabelById(this.labelId);
+        return this.$store.getters['labels/getLabelById'](this.labelId);
       },
       message() {
-        return this.$store.getters.getMessageById({
-          labelId: this.labelId,
-          messageId: this.messageId,
-        });
+        return this.$store.getters['messages/getMessageById'](this.messageId);
       },
       messageId() {
         return this.$route?.params?.messageId;
@@ -78,11 +82,11 @@
       this.isLoading = true;
 
       if (!this.label) {
-        await this.$store.dispatch('loadLabel', this.labelId);
+        await this.$store.dispatch('labels/fetchLabel', this.labelId);
       }
 
-      if (!this.label?.isLoaded) {
-        await this.$store.dispatch('loadLabelMessage', {
+      if (!this.areMessagesLoaded) {
+        await this.$store.dispatch('messages/fetchMessage', {
           labelId: this.labelId,
           messageId: this.messageId,
         });
@@ -96,18 +100,24 @@
     },
     methods: {
       async toggleRead(isRead) {
-        return await this.$store.dispatch('markMessageRead', {
-          labelId: this.labelId,
+        return await this.$store.dispatch('messages/markMessageRead', {
           messageId: this.messageId,
           isRead,
         });
       },
       async onMarkUnread() {
+        this.isMarkingRead = true;
+
         await this.toggleRead(false);
+
+        this.isMarkingRead = false;
 
         this.$router.push({ name: 'Label', params: { labelId: this.labelId } });
 
-        this.$q.notify(`Marked as ${this.message.isRead ? 'Read' : 'Unread'}`);
+        this.$q.notify({
+          color: 'primary',
+          message: `Marked as ${this.message.isRead ? 'Read' : 'Unread'}`,
+        });
       },
     },
   };

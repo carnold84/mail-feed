@@ -8,6 +8,12 @@
             {{ label?.name }}
           </h3>
         </q-toolbar-title>
+        <q-toggle
+          v-model="showRead"
+          label="Show Read"
+          left-label
+          @update:model-value="onToggleShowRead"
+        />
       </q-toolbar>
     </q-header>
     <q-page-container>
@@ -47,6 +53,18 @@
               </div>
             </q-item-section>
           </q-item>
+          <q-item style="justify-content: center;">
+            <q-btn
+              color="primary"
+              :loading="isLoadingMore"
+              rounded
+              style="margin: 10px 0;"
+              unelevated
+              @click="onLoadMore"
+            >
+              Load More
+            </q-btn>
+          </q-item>
         </q-list>
       </q-page>
     </q-page-container>
@@ -64,21 +82,25 @@
     data() {
       return {
         isLoading: false,
+        isLoadingMore: false,
+        showRead: this.$store.getters['messages/getShowRead'],
       };
     },
     computed: {
+      areMessagesLoaded() {
+        return this.$store.getters['messages/getAreMessagesLoaded'](
+          this.labelId
+        );
+      },
       labelId() {
         return this.$route?.params?.labelId;
       },
       label() {
-        return this.$store.getters.getLabelById(this.labelId);
+        return this.$store.getters['labels/getLabelById'](this.labelId);
       },
       messages() {
-        return this.$store.getters.getMessagesByLabel(this.labelId, {
-          sortBy: {
-            direction: 'desc',
-            field: 'date',
-          },
+        return this.$store.getters['messages/getMessagesByLabel']({
+          labelId: this.labelId,
         });
       },
     },
@@ -86,11 +108,11 @@
       const requests = [];
 
       if (!this.label) {
-        requests.push(this.$store.dispatch('loadLabel', this.labelId));
+        requests.push(this.$store.dispatch('labels/fetchLabel', this.labelId));
       }
 
-      if (!this.label?.isLoaded) {
-        requests.push(this.$store.dispatch('loadLabelMessages', this.labelId));
+      if (!this.areMessagesLoaded) {
+        requests.push(this.loadMore());
       }
 
       if (requests.length > 0) {
@@ -102,6 +124,28 @@
       }
     },
     methods: {
+      async loadMore(reset = false) {
+        await this.$store.dispatch('messages/fetchNextMessages', {
+          labelId: this.labelId,
+          reset,
+        });
+      },
+      async onLoadMore() {
+        this.isLoadingMore = true;
+
+        await this.loadMore();
+
+        this.isLoadingMore = false;
+      },
+      async onToggleShowRead(value) {
+        this.isLoading = true;
+
+        await this.$store.dispatch('messages/setShowRead', value);
+
+        await this.loadMore(true);
+
+        this.isLoading = false;
+      },
       formatDate(date) {
         const dateTime = new Intl.DateTimeFormat('en-GB', {
           dateStyle: 'full',
