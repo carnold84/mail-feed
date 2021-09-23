@@ -140,7 +140,7 @@
       async onToggleShowRead(value) {
         this.isLoading = true;
 
-        this.$store.dispatch('messages/setShowRead', value);
+        await this.$store.dispatch('messages/setShowRead', value);
 
         await this.loadMore(true);
 

@@ -10,7 +10,7 @@ export default {
       byId: {},
     },
     pageSize: 20,
-    showRead: true,
+    showRead: localStorage.getItem('_feedify_showRead') === 'true',
   },
   getters: {
     getMessageById: (state) => (id) => {
@@ -82,7 +82,9 @@ export default {
 
       commit('updateMessage', message);
     },
-    setShowRead({ commit }, showRead) {
+    async setShowRead({ commit }, showRead) {
+      await localStorage.setItem('_feedify_showRead', showRead);
+
       commit('setShowRead', showRead);
     },
   },

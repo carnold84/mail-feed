@@ -18,11 +18,12 @@
           </h4>
         </q-toolbar-title>
         <q-btn
+          dense
           :disable="message === undefined"
           flat
-          round
-          dense
           icon="mark_as_unread"
+          :loading="isMarkingRead"
+          round
           @click="onMarkUnread"
         />
       </q-toolbar>
@@ -45,6 +46,7 @@
     data() {
       return {
         isLoading: false,
+        isMarkingRead: false,
       };
     },
     computed: {
@@ -104,7 +106,11 @@
         });
       },
       async onMarkUnread() {
+        this.isMarkingRead = true;
+
         await this.toggleRead(false);
+
+        this.isMarkingRead = false;
 
         this.$router.push({ name: 'Label', params: { labelId: this.labelId } });
 
