@@ -12,7 +12,7 @@
 
       const initialRoute = this.$store.getters['auth/initialRoute'];
 
-      this.$router.push(initialRoute);
+      this.$router.replace(initialRoute);
     },
   };
 </script>

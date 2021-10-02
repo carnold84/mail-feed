@@ -2,13 +2,7 @@
   <q-layout view="lHh lpr lFf">
     <q-header>
       <q-toolbar class="text-primary bg-white g_tool_bar">
-        <q-btn
-          flat
-          round
-          dense
-          icon="arrow_back"
-          :to="{ name: 'Label', params: { labelId } }"
-        />
+        <q-btn flat round dense icon="arrow_back" @click="onBack" />
         <q-toolbar-title>
           <h3 class="text-subtitle1 title_text">
             {{ message?.from }}
@@ -99,11 +93,8 @@
       this.isLoading = false;
     },
     methods: {
-      async toggleRead(isRead) {
-        return await this.$store.dispatch('messages/markMessageRead', {
-          messageId: this.messageId,
-          isRead,
-        });
+      onBack() {
+        this.$router.back();
       },
       async onMarkUnread() {
         this.isMarkingRead = true;
@@ -112,11 +103,17 @@
 
         this.isMarkingRead = false;
 
-        this.$router.push({ name: 'Label', params: { labelId: this.labelId } });
+        this.$router.back();
 
         this.$q.notify({
           color: 'primary',
           message: `Marked as ${this.message.isRead ? 'Read' : 'Unread'}`,
+        });
+      },
+      async toggleRead(isRead) {
+        return await this.$store.dispatch('messages/markMessageRead', {
+          messageId: this.messageId,
+          isRead,
         });
       },
     },

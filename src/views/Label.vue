@@ -2,7 +2,7 @@
   <q-layout view="lHh lpr lFf">
     <q-header>
       <q-toolbar class="text-primary bg-white g_tool_bar">
-        <q-btn flat round dense icon="arrow_back" :to="{ name: 'Home' }" />
+        <q-btn flat round dense icon="arrow_back" @click="onBack" />
         <q-toolbar-title>
           <h3 class="text-subtitle1 title_text">
             {{ label?.name }}
@@ -129,6 +129,9 @@
           labelId: this.labelId,
           reset,
         });
+      },
+      onBack() {
+        this.$router.back();
       },
       async onLoadMore() {
         this.isLoadingMore = true;
