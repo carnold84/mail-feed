@@ -15,6 +15,9 @@ module.exports = {
   },
   pwa: {
     name,
+    manifestOptions: {
+      background_color: '#ffffff',
+    },
     msTileColor: '#a437c9',
     themeColor: '#a437c9',
   },
