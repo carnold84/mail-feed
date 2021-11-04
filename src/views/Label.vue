@@ -56,7 +56,9 @@
           <q-item style="justify-content: center;">
             <q-btn
               color="primary"
+              :disable="!isNextPage"
               :loading="isLoadingMore"
+              :outline="!isNextPage"
               rounded
               style="margin: 10px 0;"
               unelevated
@@ -91,6 +93,9 @@
         return this.$store.getters['messages/getAreMessagesLoaded'](
           this.labelId
         );
+      },
+      isNextPage() {
+        return this.$store.getters['messages/isNextPage'](this.labelId);
       },
       labelId() {
         return this.$route?.params?.labelId;

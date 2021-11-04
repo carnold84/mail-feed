@@ -51,6 +51,9 @@ export default {
     getShowRead(state) {
       return state.showRead;
     },
+    isNextPage: (state) => (labelId) => {
+      return !!state.messages.byLabel[labelId]?.nextPageToken;
+    },
   },
   actions: {
     async fetchMessage({ commit }, { labelId, messageId }) {
