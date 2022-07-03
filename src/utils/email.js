@@ -48,9 +48,13 @@ export const extractField = (message, fieldName) => {
 };
 
 export const extractContent = (message) => {
-  const part = message.payload.parts.filter((part) => {
-    return part.mimeType == 'text/html';
-  })[0];
+  if (message.payload.parts) {
+    const part = message.payload.parts.filter((part) => {
+      return part.mimeType == 'text/html';
+    })[0];
 
-  return UTF8ArrToStr(Buffer.from(part.body.data, 'base64'));
+    return UTF8ArrToStr(Buffer.from(part.body.data, 'base64'));
+  }
+
+  return UTF8ArrToStr(Buffer.from(message.payload.body.data, 'base64'));
 };
